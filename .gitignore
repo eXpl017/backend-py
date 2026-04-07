@@ -1,0 +1,4 @@
+.venv/
+kafka-docker/data
+
+uv.lock
