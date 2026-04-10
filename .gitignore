@@ -1,4 +1,7 @@
 .venv/
 kafka-docker/data
+**/__pycache__/
+
+consumer/
 
 uv.lock
