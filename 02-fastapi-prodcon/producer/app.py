@@ -1,10 +1,11 @@
+import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, BackgroundTasks
 from confluent_kafka.admin import AdminClient
 from producer.schema import ProducerMessage
 from producer.producer import produce_kafka_msg
 
-from constants import KAFKA_BROKER, KAFKA_TOPIC, KAFKA_ADMIN_CLIENT
+from producer.constants import KAFKA_BROKER, KAFKA_TOPIC, KAFKA_ADMIN_CLIENT
 
 
 @asynccontextmanager
@@ -39,3 +40,8 @@ def add_routes():
 
 app = FastAPI(lifespan=lifespan)
 add_routes()
+
+
+if __name__=="__main__":
+    # uvicorn.run("app:app",host="127.0.0.1",port=9002,reload=True)
+    uvicorn.run("producer.app:app",host="127.0.0.1",port=9002,reload_dirs=["./producer"],reload=True)
