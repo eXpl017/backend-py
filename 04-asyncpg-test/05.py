@@ -24,6 +24,11 @@ async def main():
         print(f'Error occured: {e}')
 
     finally:
+
+        # when you acquire a conn from pool, you need to release it
+        # closing it and releasing it are different
+        # closing will close to the conn, and not return anything to pool
+        # release will safely return the connection back into the pool for further usage
         if conn and pool:
             await pool.release(conn)
         if pool:

@@ -2,5 +2,6 @@
 kafka-docker/data
 **/__pycache__/
 
-
 uv.lock
+
+03-beyond-crud/my_req.sh
