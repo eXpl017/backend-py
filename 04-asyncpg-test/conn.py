@@ -19,8 +19,8 @@ class DBConn:
                     user=self.DB_USER,
                     database=self.DB_NAME,
                     password=self.DB_PASS,
-                    max_size=1,
-                    min_size=1
+                    max_size=10,
+                    min_size=10
             )
             return pool
 
