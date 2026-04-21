@@ -1,4 +1,5 @@
 .venv/
+**.env
 kafka-docker/data
 **/__pycache__/
 
