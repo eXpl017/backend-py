@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "alembic>=1.18.4",
     "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
     "confluent-kafka>=2.14.0",
     "faker>=40.13.0",
     "fastapi[standard]>=0.135.3",
