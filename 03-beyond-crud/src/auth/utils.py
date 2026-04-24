@@ -43,7 +43,7 @@ def decode_token(token: str) -> dict:
         token_data = jwt.decode(
             jwt = token,
             key = config.JWT_SECRET,
-            algorithm = config.JWT_ALGORITHM
+            algorithms = [config.JWT_ALGORITHM]
         )
         return token_data
     except jwt.PyJWTError as e:
