@@ -1,11 +1,11 @@
 import bcrypt
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.config import config
 from uuid import uuid4
 
 
-ACCESS_TOKEN_EXPIRY = 900
+ACCESS_TOKEN_EXPIRY = 30
 
 
 def hash_passwd(passwd: str) -> str:
@@ -18,7 +18,7 @@ def verify_passwd(login_passwd: str, hashed_passwd: str) -> bool:
     return bcrypt.checkpw(login_passwd.encode(), hashed_passwd.encode())
 
 
-def create_access_token(
+def create_token(
     user_data: dict,
     expiry: int = ACCESS_TOKEN_EXPIRY,
     refresh: bool = False
@@ -28,7 +28,7 @@ def create_access_token(
     payload['user'] = user_data
     payload['jti'] = str(uuid4())
     payload['refresh'] = refresh
-    payload['exp'] = datetime.now() + (timedelta(days=expiry) if refresh else timedelta(seconds=expiry))
+    payload['exp'] = datetime.now(timezone.utc) + (timedelta(days=expiry) if refresh else timedelta(seconds=expiry))
 
     token = jwt.encode(
         payload=payload,

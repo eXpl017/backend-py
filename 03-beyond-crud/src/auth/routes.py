@@ -5,9 +5,10 @@ from src.db.main import get_session
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
-from .utils import create_access_token, decode_token, verify_passwd
-from .dependencies import RefreshTokenBearer
-from datetime import timedelta, datetime
+from .utils import create_token, decode_token, verify_passwd
+from .dependencies import RefreshTokenBearer, AccessTokenBearer
+from datetime import timedelta, datetime, timezone
+from src.db.redis import add_token_to_blacklist
 
 
 REFRESH_TOKEN_EXPIRY=2
@@ -15,6 +16,7 @@ REFRESH_TOKEN_EXPIRY=2
 auth_router = APIRouter()
 user_service = UserService()
 refresh_token_bearer = RefreshTokenBearer()
+access_token_bearer = AccessTokenBearer()
 
 
 @auth_router.post(
@@ -48,14 +50,14 @@ async def login_user(
     if user is not None:
         password_valid = verify_passwd(password, user.password_hash)
         if password_valid:
-            access_token = create_access_token(
+            access_token = create_token(
                 user_data = {
                     'user_id': str(user.uid),
                     'user_email': user.email
                 }
             )
 
-            refresh_token = create_access_token(
+            refresh_token = create_token(
                 user_data = {
                     'user_id': str(user.uid),
                     'user_email': user.email
@@ -86,8 +88,9 @@ async def login_user(
 async def get_new_access_token(token_details: dict = Depends(refresh_token_bearer)):
 
     exp_time = token_details['exp']
+    print('MIBOMBOOOO: ',datetime.fromtimestamp(exp_time), datetime.now(timezone.utc))
     if datetime.fromtimestamp(exp_time) > datetime.now():
-        new_access_token = create_access_token(
+        new_access_token = create_token(
             user_data = token_details['user']
         )
 
@@ -98,4 +101,17 @@ async def get_new_access_token(token_details: dict = Depends(refresh_token_beare
     raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail='Invalid or expired refresh token'
+    )
+
+
+@auth_router.get('/logout')
+async def revoke_token(token_details: dict = Depends(access_token_bearer)):
+    token_jti = token_details['jti']
+    await add_token_to_blacklist(token_jti)
+
+    return JSONResponse(
+        content={
+            'message': 'Logged out successfully'
+        },
+        status_code=status.HTTP_200_OK
     )
