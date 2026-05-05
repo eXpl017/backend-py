@@ -1,8 +1,8 @@
 .venv/
 **.env
 kafka-docker/data
+redis-docker/data
 **/__pycache__/
 
 uv.lock
 
-03-beyond-crud/my_req.sh
