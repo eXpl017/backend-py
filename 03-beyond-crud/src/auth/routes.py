@@ -52,7 +52,7 @@ async def login_user(
             access_token = create_token(
                 user_data = {
                     'user_id': str(user.uid),
-                    'user_email': user.email
+                    'user_email': user.email,
                     'user_role': user.role
                 }
             )
@@ -106,7 +106,7 @@ async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer(
 
 @auth_router.get('/me')
 async def get_current_user(
-    user = Depends(get_current_user),
+    user = Depends(get_curr_user),
     _: bool = Depends(role_checker)
 ):
     return user

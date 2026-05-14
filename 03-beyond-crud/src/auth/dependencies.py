@@ -82,7 +82,7 @@ class RoleChecker:
     def __init__(self, allowed_roles: list[str]) -> None:
         self.allowed_roles = allowed_roles
 
-    def __call__(self, current_user: User = Depends(get_current_user)):
+    def __call__(self, current_user: User = Depends(get_curr_user)):
         if current_user.user_role in self.allowed_roles:
             return True
 
