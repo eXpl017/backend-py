@@ -20,6 +20,7 @@ class UserService:
         hashed_passwd = hash_passwd(user_data_dict['password'])
         new_user = User(**user_data_dict)
         new_user.password_hash = hashed_passwd
+        new_user.role = "user"
         session.add(new_user)
         await session.commit()
         return new_user

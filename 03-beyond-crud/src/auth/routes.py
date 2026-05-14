@@ -6,7 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from .utils import create_token, decode_token, verify_passwd
-from .dependencies import RefreshTokenBearer, AccessTokenBearer
+from .dependencies import RefreshTokenBearer, AccessTokenBearer, get_curr_user, RoleChecker
 from datetime import timedelta, datetime, timezone
 from src.db.redis import add_token_to_blacklist
 
@@ -15,8 +15,7 @@ REFRESH_TOKEN_EXPIRY=2
 
 auth_router = APIRouter()
 user_service = UserService()
-refresh_token_bearer = RefreshTokenBearer()
-access_token_bearer = AccessTokenBearer()
+role_checker = RoleChecker(['admin','user'])
 
 
 @auth_router.post(
@@ -53,7 +52,8 @@ async def login_user(
             access_token = create_token(
                 user_data = {
                     'user_id': str(user.uid),
-                    'user_email': user.email
+                    'user_email': user.email,
+                    'user_role': user.role
                 }
             )
 
@@ -85,7 +85,7 @@ async def login_user(
 
 
 @auth_router.get('/refresh_token')
-async def get_new_access_token(token_details: dict = Depends(refresh_token_bearer)):
+async def get_new_access_token(token_details: dict = Depends(RefreshTokenBearer())):
 
     exp_time = token_details['exp']
     print('MIBOMBOOOO: ',datetime.fromtimestamp(exp_time), datetime.now(timezone.utc))
@@ -104,8 +104,16 @@ async def get_new_access_token(token_details: dict = Depends(refresh_token_beare
     )
 
 
+@auth_router.get('/me')
+async def get_current_user(
+    user = Depends(get_curr_user),
+    _: bool = Depends(role_checker)
+):
+    return user
+
+
 @auth_router.get('/logout')
-async def revoke_token(token_details: dict = Depends(access_token_bearer)):
+async def revoke_token(token_details: dict = Depends(AccessTokenBearer())):
     token_jti = token_details['jti']
     await add_token_to_blacklist(token_jti)
 
